@@ -54,7 +54,7 @@ rs_iptables_add() {
 				mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
 				mac="${mac:0:2}:${mac:2:2}:${mac:4:2}:${mac:6:2}:${mac:8:2}:${mac:10:2}"
 				if [ ! -z "$mac" ] ; then
-					iptables -t nat -I $appname -m mac --mac-source $mac -j RETURN
+					iptables -t nat -I $appname -s $mac -j RETURN
 				fi
 			fi
 		done <　/tmp/ss_spec_lan.txt
