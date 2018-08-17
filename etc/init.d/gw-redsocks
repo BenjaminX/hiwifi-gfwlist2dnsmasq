@@ -53,9 +53,9 @@ rs_iptables_add() {
 		# mac地址 禁用ss
 		while read line
 		do
-			ip=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
-			if [ ! -z "$mac" ] ; then
-				iptables -t nat -I $appname -s $ip -j RETURN
+			ipss=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
+			if [ ! -z "$ipss" ] ; then
+				iptables -t nat -I $appname -s $ipss -j RETURN
 			fi
 		done <　/tmp/ss_spec_lan.txt
 	fi
