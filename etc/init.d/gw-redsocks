@@ -49,7 +49,7 @@ rs_iptables_add() {
 	iptables -t nat -A $appname -d $wanip/24 -j RETURN
 	iptables -t nat -A $appname -d $server_ip/32 -j RETURN
 
-    if [ -f "/tmp/ss_spec_lan.txt" ]; then
+    if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
 		# mac地址 禁用ss
 		while read line
 		do
