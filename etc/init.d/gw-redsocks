@@ -53,16 +53,12 @@ rs_iptables_add() {
 		# mac地址 禁用ss
 		while read line
 		do
-			if [ ! -z "$linemac" ] ; then
-				mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
-				if [ ! -z "$mac" ] ; then
-					iptables -t nat -I $appname -s $mac -j RETURN
-				fi
+			mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
+			if [ ! -z "$mac" ] ; then
+				iptables -t nat -I $appname -s $mac -j RETURN
 			fi
 		done <　/tmp/ss_spec_lan.txt
 	fi
-
-	iptables -t nat -I gw-shadowsocks -s 10.1.1.190 -j RETURN
 	
 	# 翻墙地址，域名或ip
 	iptables -t nat -A $appname -m set --match-set ss_white dst -j DNAT --to-destination $lan_ip:$rs_port_tcp
