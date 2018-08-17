@@ -49,15 +49,20 @@ rs_iptables_add() {
 	iptables -t nat -A $appname -d $wanip/24 -j RETURN
 	iptables -t nat -A $appname -d $server_ip/32 -j RETURN
 
-	if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
+    if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
 		# mac地址 禁用ss
 		while read line
 		do
-			if [ ! -z "$line" ] ; then
-				iptables -t nat -I $appname -s $line -j RETURN
+			if [ ! -z "$linemac" ] ; then
+				mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
+				mac="${mac:0:2}:${mac:2:2}:${mac:4:2}:${mac:6:2}:${mac:8:2}:${mac:10:2}"
+				if [ ! -z "$mac" ] ; then
+					iptables -t nat -I $appname -s $mac -j RETURN
+				fi
 			fi
 		done <　/tmp/ss_spec_lan.txt
 	fi
+
 	
 	# 翻墙地址，域名或ip
 	iptables -t nat -A $appname -m set --match-set ss_white dst -j DNAT --to-destination $lan_ip:$rs_port_tcp
