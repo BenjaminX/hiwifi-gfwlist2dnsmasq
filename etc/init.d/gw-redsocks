@@ -56,6 +56,7 @@ rs_iptables_add() {
 			ipss=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
 			if [ ! -z "$ipss" ] ; then
 				iptables -t nat -I $appname -s $ipss -j RETURN
+				echo $ipss
 			fi
 		done <　/tmp/ss_spec_lan.txt
 	fi
