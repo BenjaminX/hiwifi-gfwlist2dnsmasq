@@ -46,22 +46,18 @@ rs_iptables_add() {
 	iptables -t nat -A $appname -d $wanip/24 -j RETURN
 	iptables -t nat -A $appname -d $server_ip/32 -j RETURN
 
-	# if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
-	# 	# mac地址 禁用ss
-	# 	while read line
-	# 	do
-	# 		if [ ! -z "$linemac" ] ; then
-	# 			mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
-	# 			mac="${mac:0:2}:${mac:2:2}:${mac:4:2}:${mac:6:2}:${mac:8:2}:${mac:10:2}"
-	# 			if [ ! -z "$mac" ] ; then
-	# 				iptables -t nat -I $appname -m mac --mac-source $mac -j RETURN
-	# 			fi
-	# 		fi
-	# 	done <　/tmp/ss_spec_lan.txt
-	# fi
 
-	#iptables -t nat -I $appname -s 10.1.1.190 -j RETURN
-
+	ss_spec_file="/tmp/ss_spec_lan.txt"
+	if [ -e "$ss_spec_file" ]; then
+		while IFS= read line
+		do
+			mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
+			if [ ! -z "$mac" ] ; then
+				iptables -t nat -I $appname -s $mac -j RETURN
+			fi
+		done < "$ss_spec_file"
+	fi
+	
 	# 翻墙地址，域名或ip
 	iptables -t nat -A $appname -m set --match-set ss_white dst -j DNAT --to-destination $lan_ip:$rs_port_tcp
 	# 不翻墙地址，域名或ip
@@ -185,17 +181,6 @@ start() {
 				echo "server=/$line/127.0.0.1#53535" >> /tmp/dnsmasq.d/$appname.usr.dnslist
 			fi
 		done < /tmp/ss_addr.list
-	fi
-
-	ss_spec_file="/tmp/ss_spec_lan.txt"
-	if [ -e "$ss_spec_file" ]; then
-		while IFS= read line
-		do
-			mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
-			if [ ! -z "$mac" ] ; then
-				iptables -t nat -I $appname -s $mac -j RETURN
-			fi
-		done <　"$ss_spec_file"
 	fi
 
 	cp $appdir/$appname.dnslist /tmp/dnsmasq.d/
