@@ -40,24 +40,24 @@ rs_getconfig() {
 
 rs_iptables_add() {
 	echo -n > /dev/null
-	iptables -t nat -N $appname 
+	iptables -t nat -N $appname
 	iptables -t nat -A PREROUTING -i br-lan -j $appname
 	iptables -t nat -A OUTPUT -j $appname
-	iptables -t nat -A $appname -m salist --salist local --match-dip -j RETURN 
-	iptables -t nat -A $appname -m salist --salist hiwifi --match-dip -j RETURN 
+	iptables -t nat -A $appname -m salist --salist local --match-dip -j RETURN
+	iptables -t nat -A $appname -m salist --salist hiwifi --match-dip -j RETURN
 	iptables -t nat -A $appname -d $lan_ip/24 -j RETURN
 	iptables -t nat -A $appname -d $wanip/24 -j RETURN
 	iptables -t nat -A $appname -d $server_ip/32 -j RETURN
-	
+
+
+
 	if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
-		# mac地址 禁用ss
+		# IP地址 禁用ss
 		while read line
 		do
-			if [ ! -z "$linemac" ] ; then
-				mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
-				if [ ! -z "$mac" ] ; then
-					iptables -t nat -I $appname -s $mac -j RETURN
-				fi
+			ipaddress=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
+			if [ ! -z "$ipaddress" ] ; then
+				iptables -t nat -I $appname -s $ipaddress -j RETURN
 			fi
 		done <　/tmp/ss_spec_lan.txt
 	fi
@@ -70,7 +70,7 @@ rs_iptables_add() {
 	[ "$mode" != "1" ] && {
 		iptables -t nat -A $appname -m salist --salist china --match-dip -j RETURN
 	}
-	
+
     iptables -t nat -A $appname -p tcp -j DNAT --to-destination $lan_ip:$rs_port_tcp
 }
 
