@@ -146,16 +146,16 @@ rs_ipset() {
 	rm /tmp/ss_spec_wan.txt
 
 	# 从过滤后的文件中检测符合 点，筛选出ip
-	grep "\." /tmp/ss_spec_lan.txt >> /tmp/ss_wantoss.list
+	grep "\." /tmp/ss_spec_lan.txt >> /tmp/ss_wannoss.list
 	grep -v "\." /tmp/ss_spec_lan.txt >> /tmp/ss_spec_lan.txt
 
-	# 加载telegram网段
-	cat >> "/tmp/ss_wantoss.list" <<-\TELEGRAM
-91.108.56.0/22
-91.108.4.0/22
-109.239.140.0/24
-149.154.160.0/20
-TELEGRAM
+# 	# 加载telegram网段
+# 	cat >> "/tmp/ss_wantoss.list" <<-\TELEGRAM
+# 91.108.56.0/22
+# 91.108.4.0/22
+# 109.239.140.0/24
+# 149.154.160.0/20
+# TELEGRAM
 
 	# 清空原先的ipset内容
 	ipset flush ss_white
@@ -172,6 +172,9 @@ TELEGRAM
 		sed -e "s/^/-A ss_white &/g" -e "1 i\-N ss_white hash:net " /tmp/ss_wantoss.list | ipset -R -!
 	fi
 }
+
+
+
 
 start() {
 	rs_ipset
@@ -199,13 +202,15 @@ EOF
 	/etc/init.d/dnsmasq restart
 }
 
+
 stop() {
 	rs_iptables_del
-	
+
 	rm /tmp/dnsmasq.d/$appname.dnslist
     rm /tmp/dnsmasq.d/$appname.usr.dnslist
 	/etc/init.d/dnsmasq restart
 }
+
 
 restart() {
    stop
