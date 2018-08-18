@@ -221,12 +221,12 @@ local i18n = require "luci.i18n"
                                             <tr id="ss_config_addr">
                                                 <td colspan="3" style="border-top: 0 none;">
                                                     <a href="javascript:spoiler_toggle('script_addr')">
-                                                        <span>白名单，强制使用代理。</span>
+                                                        <span>白名单-强制使用代理</span>
                                                     </a>
                                                     <div id="script_addr" style="display:none;">
                                                         <p>列表中的IP或域名会强制使用代理解析</p>
                                                         <p>（每行一条，以#开头的作为备注不生效）</p>
-                                                        <p>例如：100.100.100.100\google.com</p>
+                                                        <p>例如：google.com</p>
                                                         <textarea rows="10" class="form-input" data-type="addr_list" placeholder=""></textarea>
                                                     </div>
                                                     <br/>
@@ -235,12 +235,12 @@ local i18n = require "luci.i18n"
                                             <tr id="ss_config_lan">
                                                 <td colspan="3" style="border-top: 0 none;">
                                                     <a href="javascript:spoiler_toggle('script_lan')">
-                                                        <span>黑名单，排除本地LAN不使用代理。</span>
+                                                        <span>黑名单-排除本地LAN不使用代理</span>
                                                     </a>
                                                     <div id="script_lan" style="display:none;">
                                                         <p>内网(LAN)设置绕过SS，不使用SS访问外网</p>
-                                                        <p>（每一个ip/mac地址一行，以#开头的作为备注不生效）</p>
-                                                        <p>例如：192.168.199.101/34:64:A9:9A:4B:A8</p>
+                                                        <p>（每一个IP地址一行，以#开头的作为备注不生效）</p>
+                                                        <p>例如：192.168.199.101</p>
                                                         <textarea rows="10" class="form-input" data-type="lan_list" placeholder=""></textarea>
                                                     </div>
                                                     <br/>
