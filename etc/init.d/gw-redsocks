@@ -12,13 +12,10 @@ appdir=/etc/$appname
 
 # 要翻墙解析的域名
 addr_list=/etc/gw-shadowsocks/addr_list.conf
-
-# 局域网使用ss的策略，可填ip
+# 局域网使用ss的策略，可填 mac或ip
 lan_list=/etc/gw-shadowsocks/lan_list.conf
-
 # 自定义访问外网策略
 wan_list=/etc/gw-shadowsocks/wan_list.conf
-
 # 自定义策略可以填写域名或ip，域名会自动解析成ip
 # 根据前缀来进行区分：
 #
@@ -40,28 +37,30 @@ rs_getconfig() {
 
 rs_iptables_add() {
 	echo -n > /dev/null
-	iptables -t nat -N $appname
+	iptables -t nat -N $appname 
 	iptables -t nat -A PREROUTING -i br-lan -j $appname
 	iptables -t nat -A OUTPUT -j $appname
-	iptables -t nat -A $appname -m salist --salist local --match-dip -j RETURN
-	iptables -t nat -A $appname -m salist --salist hiwifi --match-dip -j RETURN
+	iptables -t nat -A $appname -m salist --salist local --match-dip -j RETURN 
+	iptables -t nat -A $appname -m salist --salist hiwifi --match-dip -j RETURN 
 	iptables -t nat -A $appname -d $lan_ip/24 -j RETURN
 	iptables -t nat -A $appname -d $wanip/24 -j RETURN
 	iptables -t nat -A $appname -d $server_ip/32 -j RETURN
 
-	if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
-		# mac地址 禁用ss
-		while read line
-		do
-			if [ ! -z "$linemac" ] ; then
-				mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
-				mac="${mac:0:2}:${mac:2:2}:${mac:4:2}:${mac:6:2}:${mac:8:2}:${mac:10:2}"
-				if [ ! -z "$mac" ] ; then
-					iptables -t nat -I $appname -m mac --mac-source $mac -j RETURN
-				fi
-			fi
-		done <　/tmp/ss_spec_lan.txt
-	fi
+	# if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
+	# 	# mac地址 禁用ss
+	# 	while read line
+	# 	do
+	# 		if [ ! -z "$linemac" ] ; then
+	# 			mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
+	# 			mac="${mac:0:2}:${mac:2:2}:${mac:4:2}:${mac:6:2}:${mac:8:2}:${mac:10:2}"
+	# 			if [ ! -z "$mac" ] ; then
+	# 				iptables -t nat -I $appname -m mac --mac-source $mac -j RETURN
+	# 			fi
+	# 		fi
+	# 	done <　/tmp/ss_spec_lan.txt
+	# fi
+
+	iptables -t nat -I $appname -s 10.1.1.190 -j RETURN
 
 	# 翻墙地址，域名或ip
 	iptables -t nat -A $appname -m set --match-set ss_white dst -j DNAT --to-destination $lan_ip:$rs_port_tcp
@@ -71,7 +70,7 @@ rs_iptables_add() {
 	[ "$mode" != "1" ] && {
 		iptables -t nat -A $appname -m salist --salist china --match-dip -j RETURN
 	}
-
+	
     iptables -t nat -A $appname -p tcp -j DNAT --to-destination $lan_ip:$rs_port_tcp
 }
 
@@ -146,16 +145,16 @@ rs_ipset() {
 	rm /tmp/ss_spec_wan.txt
 
 	# 从过滤后的文件中检测符合 点，筛选出ip
-	grep "\." /tmp/ss_spec_lan.txt >> /tmp/ss_wannoss.list
+	grep "\." /tmp/ss_spec_lan.txt >> /tmp/ss_wantoss.list
 	grep -v "\." /tmp/ss_spec_lan.txt >> /tmp/ss_spec_lan.txt
 
-# 	# 加载telegram网段
-# 	cat >> "/tmp/ss_wantoss.list" <<-\TELEGRAM
-# 91.108.56.0/22
-# 91.108.4.0/22
-# 109.239.140.0/24
-# 149.154.160.0/20
-# TELEGRAM
+	# 加载telegram网段
+	cat >> "/tmp/ss_wantoss.list" <<-\TELEGRAM
+91.108.56.0/22
+91.108.4.0/22
+109.239.140.0/24
+149.154.160.0/20
+TELEGRAM
 
 	# 清空原先的ipset内容
 	ipset flush ss_white
@@ -172,9 +171,6 @@ rs_ipset() {
 		sed -e "s/^/-A ss_white &/g" -e "1 i\-N ss_white hash:net " /tmp/ss_wantoss.list | ipset -R -!
 	fi
 }
-
-
-
 
 start() {
 	rs_ipset
@@ -202,15 +198,13 @@ EOF
 	/etc/init.d/dnsmasq restart
 }
 
-
 stop() {
 	rs_iptables_del
-
+	
 	rm /tmp/dnsmasq.d/$appname.dnslist
     rm /tmp/dnsmasq.d/$appname.usr.dnslist
 	/etc/init.d/dnsmasq restart
 }
-
 
 restart() {
    stop
