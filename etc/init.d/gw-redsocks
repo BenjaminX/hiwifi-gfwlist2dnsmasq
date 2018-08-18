@@ -187,15 +187,15 @@ start() {
 		done < /tmp/ss_addr.list
 	fi
 
-	echo >> /tmp/ss_spec_lan.txt
-	if [ ! -f "/tmp/ss_spec_lan.txt" ]; then
-		while read line
+	ss_spec_file="/tmp/ss_spec_lan.txt"
+	if [ -e "$ss_spec_file" ]; then
+		while IFS= read line
 		do
 			mac=$(echo $line | sed s/://g| sed s/：//g | tr '[a-z]' '[A-Z]')
 			if [ ! -z "$mac" ] ; then
 				iptables -t nat -I $appname -s $mac -j RETURN
 			fi
-		done <　/tmp/ss_spec_lan.txt
+		done <　"$ss_spec_file"
 	fi
 
 	cp $appdir/$appname.dnslist /tmp/dnsmasq.d/
